@@ -7,12 +7,6 @@ import (
 
 var logger log.Glogger // Replace with generic via interface
 
-// Redis connection or config
-// User:
-//  - identity?
-//  - max limit
-//  - window
-
 var errRateLimitExceeded = "Rate limit exceeded"
 
 var rlScript = func() *redis.Script {
