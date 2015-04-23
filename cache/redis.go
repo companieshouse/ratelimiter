@@ -32,7 +32,7 @@ return current`)
 // Limit provides rate limiting functionality
 func (rl *RedisLimiter) Limit(identity string, limit int, window int) (rateLimitExceeded bool, remaining int, reset int, lastError error) {
 
-	logger.Debug("Rate limiting for identity: [%s] Limit: [%s] Window: [%s]", identity, limit, window)
+	logger.Debug("Rate limiting for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
 
 	var r int64
 	var err error
@@ -43,7 +43,7 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window int) (rateLimit
 	rateLimitExceeded = false
 
 	r, err = redis.Int64(rlScript.Do(conn, "RateLimit:"+identity, limit, window))
-	logger.Debug("Get and Decrement rate limit for identity: [%s] Remaining: [%s]", identity, r)
+	logger.Debug("Get and Decrement rate limit for identity: [%s] Remaining: [%d] Window: [%d]", identity, r, window)
 
 	if err != nil && err.Error() != errRateLimitExceeded {
 		rateLimitExceeded, lastError = handleUnexpected(err)

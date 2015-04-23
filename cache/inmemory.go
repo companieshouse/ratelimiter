@@ -10,7 +10,7 @@ type InMemoryLimiter struct {
 // InMemoryLimiter provides rate limiting functionality
 func (rl *InMemoryLimiter) Limit(identity string, limit int, window int) (rateLimitExceeded bool, remaining int, reset int, lastError error) {
 
-	logger.Debug("Rate limiting (in memory) for identity: [%s] Limit: [%s] Window: [%s]", identity, limit, window)
+	logger.Debug("Rate limiting (in memory) for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
 
 	rateLimitExceeded = false
 	remaining = limit

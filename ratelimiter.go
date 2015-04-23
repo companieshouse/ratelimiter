@@ -12,10 +12,12 @@ var logger log.Glogger // Replace with generic via interface?
 // If not supplied with a redis connection pool, will use in memory caching instead
 func NewRateLimiter(pool *redis.Pool) *Limiter {
 	if pool != nil {
+		logger.Info("Creating rate limiter with redis cache")
 		return &Limiter{
 			cache: &cache.RedisLimiter{Pool: pool},
 		}
 	}
+	logger.Info("Creating rate limiter with in-memory cache")
 	return &Limiter{
 		cache: &cache.InMemoryLimiter{},
 	}
