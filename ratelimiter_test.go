@@ -1,66 +1,50 @@
 package ratelimiter
 
 import (
-	"errors"
 	"testing"
 
+	"github.com/companieshouse/ratelimiter/cache"
 	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func setDial(c *redis.Pool, f func() (redis.Conn, error)) {
-	c.Dial = f
-}
+func TestBaseRateLimiter(t *testing.T) {
 
-func TestIntegrationRateLimiter(t *testing.T) {
+	Convey("Instantiate with redis pool", t, func() {
+		pool := &redis.Pool{
+			MaxIdle:     1,
+			IdleTimeout: 1,
+			MaxActive:   1,
+			Dial: func() (redis.Conn, error) {
+				c := redigomock.NewConn()
+				var e error
+				return c, e
+			},
+		}
 
-	conn := redigomock.NewConn()
+		rl := NewRateLimiter(pool)
+		So(rl, ShouldNotBeNil)
+		So(rl, ShouldHaveSameTypeAs, &Limiter{})
+		So(rl.cache, ShouldHaveSameTypeAs, &cache.RedisLimiter{Pool: nil})
+	})
+
+	Convey("Instantiate with in memory", t, func() {
+		rl := NewRateLimiter(nil)
+		So(rl, ShouldNotBeNil)
+		So(rl, ShouldHaveSameTypeAs, &Limiter{})
+		So(rl.cache, ShouldHaveSameTypeAs, &cache.InMemoryLimiter{})
+	})
 
 	Convey("Unlimited user", t, func() {
+		rl := NewRateLimiter(nil)
 		redigomock.Clear()
 
-		limited, remain, reset, err := RateLimiter("abc", -1, 60, conn)
+		limited, remain, reset, err := rl.Limit("abc", -1, 60)
 		So(err, ShouldBeNil)
 		So(remain, ShouldEqual, -1)
 		So(reset, ShouldEqual, 60)
 		So(limited, ShouldBeFalse)
-	})
-
-	Convey("Rate limit exceeded", t, func() {
-		redigomock.Clear()
-		redigomock.Command("EVALSHA").Expect(int64(0))
-		redigomock.Command("EVALSHA").ExpectError(errors.New("Rate limit exceeded"))
-		redigomock.Command("PTTL").Expect(int64(5))
-
-		limited, remain, reset, err := RateLimiter("abc", 10, 60, conn)
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "Rate limit exceeded")
-		So(remain, ShouldEqual, 0)
-		So(reset, ShouldEqual, 5)
-		So(limited, ShouldBeTrue)
-	})
-
-	Convey("Rate limit not exceeded", t, func() {
-		redigomock.Clear()
-		redigomock.Command("EVALSHA").Expect(int64(9))
-		redigomock.Command("PTTL", "RateLimit:abc").Expect(int64(5))
-
-		limited, remain, reset, err := RateLimiter("abc", 10, 60, conn)
-		So(err, ShouldBeNil)
-		So(remain, ShouldEqual, 9)
-		So(reset, ShouldEqual, 5)
-		So(limited, ShouldBeFalse)
-	})
-
-	Convey("Error retrieving window remaining", t, func() {
-		redigomock.Clear()
-		redigomock.Command("PTTL", "RateLimit:abc").ExpectError(errors.New("An error"))
-		redigomock.Command("EVALSHA").Expect(int64(0))
-
-		_, _, _, err := RateLimiter("abc", 10, 60, conn)
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "An error")
 	})
 
 }
