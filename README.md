@@ -14,7 +14,7 @@ pool := &redis.Pool{ ... }
 
 limiter := NewRateLimiter(pool)
 
-hasExceededLimit, allowanceRemaining, secondsToReset, err := limiter.Limit(identify, limit, window)
+exceeded, remaining, reset, err := limiter.Limit(identity, limit, window)
 ```
 
 With in-memory fake caching
@@ -22,5 +22,5 @@ With in-memory fake caching
 ```go
 limiter := NewRateLimiter()
 
-hasExceededLimit, allowanceRemaining, secondsToReset, err := limiter.Limit(identify, limit, window)
+exceeded, remaining, reset, err := limiter.Limit(identity, limit, window)
 ```
