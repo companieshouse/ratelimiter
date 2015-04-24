@@ -1,3 +1,4 @@
+// +build unit
 package cache
 
 import (
@@ -28,25 +29,25 @@ func TestRedisRateLimit(t *testing.T) {
 		redigomock.Clear()
 		redigomock.Command("EVALSHA").Expect(int64(0))
 		redigomock.Command("EVALSHA").ExpectError(errors.New("Rate limit exceeded"))
-		redigomock.Command("PTTL").Expect(int64(5))
+		redigomock.Command("PTTL").Expect(int64(5000))
 
 		limited, remain, reset, err := rl.Limit("abc", 10, 60)
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldEqual, "Rate limit exceeded")
 		So(remain, ShouldEqual, 0)
-		So(reset, ShouldEqual, 5)
+		So(reset, ShouldEqual, 5000)
 		So(limited, ShouldBeTrue)
 	})
 
 	Convey("Rate limit not exceeded", t, func() {
 		redigomock.Clear()
 		redigomock.Command("EVALSHA").Expect(int64(9))
-		redigomock.Command("PTTL", "RateLimit:abc").Expect(int64(5))
+		redigomock.Command("PTTL", "RateLimit:abc").Expect(int64(5000))
 
 		limited, remain, reset, err := rl.Limit("abc", 10, 60)
 		So(err, ShouldBeNil)
 		So(remain, ShouldEqual, 9)
-		So(reset, ShouldEqual, 5)
+		So(reset, ShouldEqual, 5000)
 		So(limited, ShouldBeFalse)
 	})
 
