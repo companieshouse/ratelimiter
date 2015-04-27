@@ -1,6 +1,6 @@
 // +build integration
 
-package cache
+package ratelimiter
 
 import (
 	"math/rand"
@@ -11,14 +11,6 @@ import (
 	"github.com/garyburd/redigo/redis"
 	. "github.com/smartystreets/goconvey/convey"
 )
-
-// func TestMain(m *testing.M) {
-//
-// 	setup()
-// 	ret := m.Run()
-// 	teardown()
-// 	os.Exit(ret)
-// }
 
 var clientKey string
 var storedClientKey string
@@ -38,7 +30,7 @@ func TestIntegrationRedisRateLimit(t *testing.T) {
 		},
 	}
 
-	rl := &RedisLimiter{Pool: pool}
+	rl := NewRateLimiter(pool)
 
 	conn := pool.Get()
 	defer conn.Close()
@@ -56,7 +48,7 @@ func TestIntegrationRedisRateLimit(t *testing.T) {
 	})
 
 	Convey("Instantiated OK", t, func() {
-		So(rl, ShouldHaveSameTypeAs, &RedisLimiter{})
+		So(rl, ShouldHaveSameTypeAs, &Limiter{})
 	})
 
 	Convey("Uncached user", t, func() {
@@ -74,6 +66,12 @@ func TestIntegrationRedisRateLimit(t *testing.T) {
 		So(err, ShouldEqual, "Rate limit exceeded")
 		So(exceeded, ShouldBeTrue)
 		conn.Do("DEL", storedClientKey)
+	})
+
+	Convey("Unlimited user", t, func() {
+		exceeded, _, _, err := rl.Limit(clientKey, -1, 60)
+		So(err, ShouldBeNil)
+		So(exceeded, ShouldBeFalse)
 	})
 
 	conn.Do("DEL", storedClientKey) // cleanup
