@@ -35,45 +35,47 @@ func TestIntegrationRedisRateLimit(t *testing.T) {
 	conn := pool.Get()
 	defer conn.Close()
 
-	Convey("Ensure redis available and setup", t, func() {
-		rand.Seed(time.Now().UTC().UnixNano())
-		clientKey = "RATELIMITER_TEST:" + "#" + strconv.Itoa(rand.Intn(100))
-		storedClientKey = "RateLimit:" + clientKey
-		Printf("Using test user id [%s]\n", clientKey)
+	Convey("Integration tests", t, func() {
 
-		_, err := conn.Do("SETEX", "TESTREDISUP", true, 1)
-		So(err, ShouldBeNil)
+		Convey("Ensure redis available and setup", func() {
+			rand.Seed(time.Now().UTC().UnixNano())
+			clientKey = "RATELIMITER_TEST:" + "#" + strconv.Itoa(rand.Intn(100))
+			storedClientKey = "RateLimit:" + clientKey
+			Printf("Using test user id [%s]\n", clientKey)
 
-		conn.Do("DEL", storedClientKey)
+			_, err := conn.Do("SETEX", "TESTREDISUP", true, 1)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("Instantiated OK", func() {
+			So(rl, ShouldHaveSameTypeAs, &Limiter{})
+		})
+
+		Convey("Uncached user", func() {
+			exceeded, remain, reset, err := rl.Limit(clientKey, 1, 60)
+			So(err, ShouldBeNil)
+			So(exceeded, ShouldBeFalse)
+			So(remain, ShouldEqual, 0)
+			So(reset, ShouldBeLessThanOrEqualTo, 60000) // >= to allow for delay in execution
+		})
+
+		Convey("Expired user", func() {
+			conn.Do("SET", storedClientKey, 0)
+			exceeded, _, _, err := rl.Limit(clientKey, 1, 60)
+			So(err, ShouldEqual, "Rate limit exceeded")
+			So(exceeded, ShouldBeTrue)
+		})
+
+		Convey("Unlimited user", func() {
+			exceeded, _, _, err := rl.Limit(clientKey, -1, 60)
+			So(err, ShouldBeNil)
+			So(exceeded, ShouldBeFalse)
+		})
+
+		Reset(func() {
+			conn.Do("DEL", storedClientKey)
+		})
+
 	})
-
-	Convey("Instantiated OK", t, func() {
-		So(rl, ShouldHaveSameTypeAs, &Limiter{})
-	})
-
-	Convey("Uncached user", t, func() {
-		exceeded, remain, reset, err := rl.Limit(clientKey, 1, 60)
-		So(err, ShouldBeNil)
-		So(exceeded, ShouldBeFalse)
-		So(remain, ShouldEqual, 0)
-		So(reset, ShouldBeLessThanOrEqualTo, 60000) // >= to allow for delay in execution
-		conn.Do("DEL", storedClientKey)
-	})
-
-	Convey("Expired user", t, func() {
-		conn.Do("SET", storedClientKey, 0)
-		exceeded, _, _, err := rl.Limit(clientKey, 1, 60)
-		So(err, ShouldEqual, "Rate limit exceeded")
-		So(exceeded, ShouldBeTrue)
-		conn.Do("DEL", storedClientKey)
-	})
-
-	Convey("Unlimited user", t, func() {
-		exceeded, _, _, err := rl.Limit(clientKey, -1, 60)
-		So(err, ShouldBeNil)
-		So(exceeded, ShouldBeFalse)
-	})
-
-	conn.Do("DEL", storedClientKey) // cleanup
 
 }

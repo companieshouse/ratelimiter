@@ -1,4 +1,5 @@
 // +build unit
+
 package cache
 
 import (
@@ -59,6 +60,15 @@ func TestRedisRateLimit(t *testing.T) {
 		_, _, _, err := rl.Limit("abc", 10, 60)
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldEqual, "An error")
+	})
+
+	Convey("Query limit", t, func() {
+		redigomock.Clear()
+		redigomock.Command("GET", "RateLimit:abc").Expect(int64(9))
+
+		remain, err := rl.QueryLimit("abc")
+		So(err, ShouldBeNil)
+		So(remain, ShouldEqual, 9)
 	})
 
 }
