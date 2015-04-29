@@ -45,7 +45,6 @@ func TestIntegrationRedisRateLimit(t *testing.T) {
 
 			_, err := conn.Do("SETEX", "TESTREDISUP", true, 1)
 			So(err, ShouldBeNil)
-
 		})
 
 		Convey("Instantiated OK", func() {

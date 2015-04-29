@@ -42,7 +42,7 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window int) (rateLimit
 
 	rateLimitExceeded = false
 
-	r, err = redis.Int64(rlScript.Do(conn, "RateLimit:"+identity, limit, window))
+	r, err = redis.Int64(rlScript.Do(conn, "RateLimit:"+identity, limit, window, nil))
 	logger.Debug("Get and Decrement rate limit for identity: [%s] Remaining: [%d] Window: [%d]", identity, r, window)
 
 	if err != nil && err.Error() != errRateLimitExceeded {
@@ -64,4 +64,19 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window int) (rateLimit
 	}
 
 	return
+}
+
+// QueryLimit allows querying of the current remaining limit for an identity
+func (rl *RedisLimiter) QueryLimit(identity string) (remain int, err error) {
+
+	conn := rl.Pool.Get()
+	defer conn.Close()
+
+	remain64, err := redis.Int64(conn.Do("GET", "RateLimit:"+identity))
+	if err != nil {
+		logger.Error("ID [%s] Failed to fetch limit remaining", identity)
+		return
+	}
+
+	return int(remain64), nil
 }

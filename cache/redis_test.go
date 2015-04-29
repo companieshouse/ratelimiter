@@ -59,4 +59,13 @@ func TestRedisRateLimit(t *testing.T) {
 		So(err.Error(), ShouldEqual, "An error")
 	})
 
+	Convey("Query limit", t, func() {
+		redigomock.Clear()
+		redigomock.Command("GET", "RateLimit:abc").Expect(int64(9))
+
+		remain, err := rl.QueryLimit("abc")
+		So(err, ShouldBeNil)
+		So(remain, ShouldEqual, 9)
+	})
+
 }
