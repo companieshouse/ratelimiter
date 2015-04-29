@@ -6,7 +6,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-var logger log.Glogger // Replace with generic via interface?
+var logger = log.NewGlogger("ratelimiter", 1)
 
 // NewRateLimiter creates a new instance of rateLimiter
 // If not supplied with a redis connection pool, will use in memory caching instead
