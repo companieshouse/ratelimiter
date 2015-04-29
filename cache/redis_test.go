@@ -1,4 +1,3 @@
-// +build unit
 package cache
 
 import (
@@ -32,8 +31,7 @@ func TestRedisRateLimit(t *testing.T) {
 		redigomock.Command("PTTL").Expect(int64(5000))
 
 		limited, remain, reset, err := rl.Limit("abc", 10, 60)
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "Rate limit exceeded")
+		So(err, ShouldBeNil)
 		So(remain, ShouldEqual, 0)
 		So(reset, ShouldEqual, 5000)
 		So(limited, ShouldBeTrue)

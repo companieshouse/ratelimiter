@@ -61,7 +61,6 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window int) (rateLimit
 	if err != nil && err.Error() == errRateLimitExceeded {
 		logger.Debug("Rate limit exceeded for identity: [%s] Time to reset: [%s]", identity, t)
 		rateLimitExceeded = true
-		lastError = err
 	}
 
 	return
