@@ -2,7 +2,7 @@
 
 _"No running in the API!"_
 
-GO based ratelimiter with redis backend
+Go based ratelimiter with redis backend
 
 Usage
 -----
@@ -18,7 +18,7 @@ limiter := NewRateLimiter(pool)
 exceeded, remaining, reset, err := limiter.Limit(identity, limit, window)
 
 // Just fetch current remaining limit
-remaining, err := limiter.Limit(identity)
+remaining, err := limiter.QueryLimit(identity)
 ```
 
 With in-memory fake caching (**nb** Doesn't perform actual rate limiting. Provides a simulation for testing and novelty purposes)
@@ -27,5 +27,5 @@ With in-memory fake caching (**nb** Doesn't perform actual rate limiting. Provid
 limiter := NewRateLimiter()
 
 exceeded, remaining, reset, err := limiter.Limit(identity, limit, window)
-remaining, err := limiter.Limit(identity)
+remaining, err := limiter.QueryLimit(identity)
 ```
