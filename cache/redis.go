@@ -1,6 +1,10 @@
 package cache
 
-import "github.com/garyburd/redigo/redis"
+import (
+	"time"
+
+	"github.com/garyburd/redigo/redis"
+)
 
 // RedisLimiter defines a redis backed rate limiter implementation
 type RedisLimiter struct {
@@ -30,7 +34,7 @@ return current`)
 }()
 
 // Limit provides rate limiting functionality
-func (rl *RedisLimiter) Limit(identity string, limit int, window int) (rateLimitExceeded bool, remaining int, reset int, lastError error) {
+func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) (rateLimitExceeded bool, remaining int, reset time.Duration, lastError error) {
 
 	logger.Debug("Rate limiting for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
 
@@ -42,7 +46,7 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window int) (rateLimit
 
 	rateLimitExceeded = false
 
-	r, err = redis.Int64(rlScript.Do(conn, "RateLimit:"+identity, limit, window, nil))
+	r, err = redis.Int64(rlScript.Do(conn, "RateLimit:"+identity, limit, int(window.Seconds()), nil))
 	logger.Debug("Get and Decrement rate limit for identity: [%s] Remaining: [%d] Window: [%d]", identity, r, window)
 
 	if err != nil && err.Error() != errRateLimitExceeded {
@@ -56,7 +60,8 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window int) (rateLimit
 		rateLimitExceeded, lastError = handleUnexpected(pttlErr)
 		return
 	}
-	reset = int(t)
+	// TTL is returned from PTTL in milliseconds and Duration wants nanoseconds
+	reset = time.Duration(t) * time.Millisecond
 
 	if err != nil && err.Error() == errRateLimitExceeded {
 		logger.Debug("Rate limit exceeded for identity: [%s] Time to reset: [%s]", identity, t)

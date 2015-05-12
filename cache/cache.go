@@ -1,10 +1,14 @@
 package cache
 
-import "github.com/companieshouse/gotools/log"
+import (
+	"time"
+
+	"github.com/companieshouse/gotools/log"
+)
 
 // Limiter defines an interface for ratelimiter implementations
 type Limiter interface {
-	Limit(string, int, int) (bool, int, int, error)
+	Limit(string, int, time.Duration) (bool, int, time.Duration, error)
 	QueryLimit(string) (int, error) // QueryLimit allows querying of the current remaining limit for an identity
 }
 

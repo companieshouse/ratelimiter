@@ -18,4 +18,10 @@ func TestInMemoryRateLimit(t *testing.T) {
 		So(limited, ShouldBeFalse)
 	})
 
+	Convey("QueryLimit", t, func() {
+		remain, err := rl.QueryLimit("abc")
+		So(err, ShouldBeNil)
+		So(remain, ShouldEqual, 0)
+	})
+
 }

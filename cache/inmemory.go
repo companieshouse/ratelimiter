@@ -1,11 +1,13 @@
 package cache
 
+import "time"
+
 // InMemoryLimiter defines a redis backed rate limiter implementation
 type InMemoryLimiter struct {
 }
 
 // Limit provides rate limiting functionality
-func (rl *InMemoryLimiter) Limit(identity string, limit int, window int) (rateLimitExceeded bool, remaining int, reset int, lastError error) {
+func (rl *InMemoryLimiter) Limit(identity string, limit int, window time.Duration) (rateLimitExceeded bool, remaining int, reset time.Duration, lastError error) {
 
 	logger.Debug("Rate limiting (in memory) for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
 
