@@ -1,10 +1,7 @@
 package cache
 
-import "github.com/garyburd/redigo/redis"
-
 // InMemoryLimiter defines a redis backed rate limiter implementation
 type InMemoryLimiter struct {
-	Pool *redis.Pool
 }
 
 // Limit provides rate limiting functionality
