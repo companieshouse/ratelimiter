@@ -41,3 +41,12 @@ limiter := NewRateLimiter()
 exceeded, remaining, reset, err := limiter.Limit(identity, limit, window)
 remaining, err := limiter.QueryLimit(identity)
 ```
+
+Unlimited limits
+----------------
+
+There are of course times when you want a user to not be subject to ratelimiting. You could just bypass the call to ```Limit```, but that's needless work on your behalf. Instead, just set the ```limit``` to ```-1```:
+
+```go
+exceeded, remaining, reset, err := limiter.Limit("MyIdentity", -1, 0)
+```
