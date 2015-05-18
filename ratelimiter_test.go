@@ -23,21 +23,21 @@ func TestBaseRateLimiter(t *testing.T) {
 			},
 		}
 
-		rl := NewRateLimiter(pool)
+		rl := NewRateLimiter(pool, nil)
 		So(rl, ShouldNotBeNil)
 		So(rl, ShouldHaveSameTypeAs, &Limiter{})
 		So(rl.cache, ShouldHaveSameTypeAs, &cache.RedisLimiter{Pool: nil})
 	})
 
 	Convey("Instantiate with in memory", t, func() {
-		rl := NewRateLimiter(nil)
+		rl := NewRateLimiter(nil, nil)
 		So(rl, ShouldNotBeNil)
 		So(rl, ShouldHaveSameTypeAs, &Limiter{})
 		So(rl.cache, ShouldHaveSameTypeAs, &cache.InMemoryLimiter{})
 	})
 
 	Convey("Unlimited user", t, func() {
-		rl := NewRateLimiter(nil)
+		rl := NewRateLimiter(nil, nil)
 		redigomock.Clear()
 
 		limited, remain, reset, err := rl.Limit("abc", -1, 60)
