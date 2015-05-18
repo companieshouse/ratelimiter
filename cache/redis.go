@@ -34,6 +34,18 @@ return current`)
 }()
 
 // Limit provides rate limiting functionality
+//
+//   Input
+//
+//   * identity - (string) a unique string to identify the user for which you're ratelimiting
+//   * limit    - (int) number of requests allowable within window
+//   * window   - (time.Duration) length of the window
+//
+//   Output
+//
+//   * exceeded  - (boolean) true if rate limit has been exceeded
+//   * remaining - (int) number of requests still allowable in current window
+//   * reset     - (time.Duration) length of time until window resets
 func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) (rateLimitExceeded bool, remaining int, reset time.Duration, lastError error) {
 
 	logger.Debug("Rate limiting for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
