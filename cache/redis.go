@@ -3,14 +3,12 @@ package cache
 import (
 	"time"
 
-	"github.com/companieshouse/ratelimiter/generic"
 	"github.com/garyburd/redigo/redis"
 )
 
 // RedisLimiter defines a redis backed rate limiter implementation
 type RedisLimiter struct {
-	Pool   *redis.Pool
-	Logger generic.Logger
+	Pool *redis.Pool
 }
 
 var errRateLimitExceeded = "Rate limit exceeded"
@@ -50,8 +48,6 @@ return current`)
 //   * reset     - (time.Duration) length of time until window resets
 func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) (rateLimitExceeded bool, remaining int, reset time.Duration, lastError error) {
 
-	rl.Logger.Debug("Rate limiting for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
-
 	var r int64
 	var err error
 
@@ -61,7 +57,6 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) 
 	rateLimitExceeded = false
 
 	r, err = redis.Int64(rlScript.Do(conn, "RateLimit:"+identity, limit, int(window.Seconds()), nil))
-	rl.Logger.Debug("Get and Decrement rate limit for identity: [%s] Remaining: [%d] Window: [%d]", identity, r, window)
 
 	if err != nil && err.Error() != errRateLimitExceeded {
 		rateLimitExceeded, lastError = rl.handleUnexpected(err)
@@ -78,7 +73,6 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) 
 	reset = time.Duration(t) * time.Millisecond
 
 	if err != nil && err.Error() == errRateLimitExceeded {
-		rl.Logger.Debug("Rate limit exceeded for identity: [%s] Time to reset: [%s]", identity, t)
 		rateLimitExceeded = true
 	}
 
@@ -92,7 +86,6 @@ func (rl *RedisLimiter) QueryLimit(identity string) (remain int, err error) {
 
 	remain64, err := redis.Int64(conn.Do("GET", "RateLimit:"+identity))
 	if err != nil {
-		rl.Logger.Error("ID [%s] Failed to fetch limit remaining", identity)
 		return
 	}
 
@@ -101,7 +94,6 @@ func (rl *RedisLimiter) QueryLimit(identity string) (remain int, err error) {
 
 func (rl *RedisLimiter) handleUnexpected(err error) (bool, error) {
 	if err != nil {
-		rl.Logger.Error("Error: [%s]", err.Error())
 		return true, err
 	}
 	return false, nil

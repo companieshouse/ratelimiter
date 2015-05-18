@@ -18,22 +18,26 @@ import (
 	"time"
 
 	"github.com/companieshouse/ratelimiter/cache"
-	"github.com/companieshouse/ratelimiter/generic"
 	"github.com/garyburd/redigo/redis"
 )
 
 // NewRateLimiter creates a new instance of rateLimiter
 // If not supplied with a redis connection pool, will use in memory caching instead
-func NewRateLimiter(pool *redis.Pool, logger generic.Logger) *Limiter {
+func NewRateLimiter(pool *redis.Pool, logger Logger) *Limiter {
+
+	if logger == nil {
+		logger = &DefaultLogger{}
+	}
+
 	if pool != nil {
 		logger.Info("Creating rate limiter with redis cache")
 		return &Limiter{
-			cache: &cache.RedisLimiter{Pool: pool, Logger: logger},
+			cache: &cache.RedisLimiter{Pool: pool},
 		}
 	}
 	logger.Info("Creating rate limiter with in-memory cache")
 	return &Limiter{
-		cache: &cache.InMemoryLimiter{Logger: logger},
+		cache: &cache.InMemoryLimiter{},
 	}
 }
 

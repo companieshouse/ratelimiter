@@ -4,15 +4,12 @@ import (
 	"testing"
 
 	"github.com/companieshouse/ratelimiter/cache"
-	"github.com/companieshouse/ratelimiter/generic"
 	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestBaseRateLimiter(t *testing.T) {
-
-	log := &generic.DefaultLogger{}
 
 	Convey("Instantiate with redis pool", t, func() {
 		pool := &redis.Pool{
@@ -26,21 +23,21 @@ func TestBaseRateLimiter(t *testing.T) {
 			},
 		}
 
-		rl := NewRateLimiter(pool, log)
+		rl := NewRateLimiter(pool, nil)
 		So(rl, ShouldNotBeNil)
 		So(rl, ShouldHaveSameTypeAs, &Limiter{})
 		So(rl.cache, ShouldHaveSameTypeAs, &cache.RedisLimiter{Pool: nil})
 	})
 
 	Convey("Instantiate with in memory", t, func() {
-		rl := NewRateLimiter(nil, log)
+		rl := NewRateLimiter(nil, nil)
 		So(rl, ShouldNotBeNil)
 		So(rl, ShouldHaveSameTypeAs, &Limiter{})
 		So(rl.cache, ShouldHaveSameTypeAs, &cache.InMemoryLimiter{})
 	})
 
 	Convey("Unlimited user", t, func() {
-		rl := NewRateLimiter(nil, log)
+		rl := NewRateLimiter(nil, nil)
 		redigomock.Clear()
 
 		limited, remain, reset, err := rl.Limit("abc", -1, 60)

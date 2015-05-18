@@ -4,15 +4,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/companieshouse/ratelimiter/generic"
 	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestRedisRateLimit(t *testing.T) {
-
-	log := &generic.DefaultLogger{}
 
 	pool := &redis.Pool{
 		MaxIdle:     1,
@@ -25,7 +22,7 @@ func TestRedisRateLimit(t *testing.T) {
 		},
 	}
 
-	rl := &RedisLimiter{Pool: pool, Logger: log}
+	rl := &RedisLimiter{Pool: pool}
 
 	Convey("Rate limit exceeded", t, func() {
 		redigomock.Clear()
