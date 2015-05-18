@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/companieshouse/ratelimiter/log"
+	"github.com/companieshouse/ratelimiter/generic"
 	"github.com/garyburd/redigo/redis"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -18,7 +18,7 @@ var storedClientKey string
 
 func TestIntegrationRedisRateLimit(t *testing.T) {
 
-	log := &log.DefaultLogger{}
+	log := &generic.DefaultLogger{}
 
 	pool := &redis.Pool{
 		MaxIdle:     1,

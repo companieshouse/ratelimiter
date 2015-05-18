@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/companieshouse/ratelimiter/cache"
-	"github.com/companieshouse/ratelimiter/log"
+	"github.com/companieshouse/ratelimiter/generic"
 	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 	. "github.com/smartystreets/goconvey/convey"
@@ -12,7 +12,7 @@ import (
 
 func TestBaseRateLimiter(t *testing.T) {
 
-	log := &log.DefaultLogger{}
+	log := &generic.DefaultLogger{}
 
 	Convey("Instantiate with redis pool", t, func() {
 		pool := &redis.Pool{

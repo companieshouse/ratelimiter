@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/companieshouse/ratelimiter/log"
+	"github.com/companieshouse/ratelimiter/generic"
 	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 	. "github.com/smartystreets/goconvey/convey"
@@ -12,7 +12,7 @@ import (
 
 func TestRedisRateLimit(t *testing.T) {
 
-	log := &log.DefaultLogger{}
+	log := &generic.DefaultLogger{}
 
 	pool := &redis.Pool{
 		MaxIdle:     1,

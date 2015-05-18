@@ -3,14 +3,14 @@ package cache
 import (
 	"time"
 
-	"github.com/companieshouse/ratelimiter/log"
+	"github.com/companieshouse/ratelimiter/generic"
 	"github.com/garyburd/redigo/redis"
 )
 
 // RedisLimiter defines a redis backed rate limiter implementation
 type RedisLimiter struct {
 	Pool   *redis.Pool
-	Logger log.Logger
+	Logger generic.Logger
 }
 
 var errRateLimitExceeded = "Rate limit exceeded"

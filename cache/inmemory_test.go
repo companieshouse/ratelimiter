@@ -3,13 +3,13 @@ package cache
 import (
 	"testing"
 
-	"github.com/companieshouse/ratelimiter/log"
+	"github.com/companieshouse/ratelimiter/generic"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestInMemoryRateLimit(t *testing.T) {
 
-	log := &log.DefaultLogger{}
+	log := &generic.DefaultLogger{}
 	rl := &InMemoryLimiter{Logger: log}
 
 	Convey("Always return unlimited", t, func() {

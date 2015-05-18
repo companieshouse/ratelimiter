@@ -3,7 +3,7 @@ package cache
 import (
 	"time"
 
-	"github.com/companieshouse/ratelimiter/log"
+	"github.com/companieshouse/ratelimiter/generic"
 )
 
 // InMemoryLimiter defines a stubbed in-memory rate limiter implementation.
@@ -12,7 +12,7 @@ import (
 // as a stubbed interface for mocking/testing when you don't have (or want to use)
 // a real redis instance.
 type InMemoryLimiter struct {
-	Logger log.Logger
+	Logger generic.Logger
 }
 
 // Limit provides stubbed rate limiting functionality. For the in-memory implementation
