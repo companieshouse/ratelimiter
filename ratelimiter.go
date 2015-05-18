@@ -21,7 +21,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-// NewRateLimiter creates a new instance of rateLimiter
+// New creates a new instance of rateLimiter
 // If not supplied with a redis connection pool, will use in memory caching instead
 func New(pool *redis.Pool, logger Logger) *Limiter {
 
