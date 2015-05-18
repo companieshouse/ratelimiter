@@ -80,16 +80,28 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) 
 }
 
 // QueryLimit allows querying of the current remaining limit for an identity
-func (rl *RedisLimiter) QueryLimit(identity string) (remain int, err error) {
+func (rl *RedisLimiter) QueryLimit(identity string, limit int, window time.Duration) (remaining int, reset time.Duration, err error) {
 	conn := rl.Pool.Get()
 	defer conn.Close()
 
 	remain64, err := redis.Int64(conn.Do("GET", "RateLimit:"+identity))
 	if err != nil {
+		if err == redis.ErrNil {
+			remaining = limit
+			reset = window
+		}
 		return
 	}
 
-	return int(remain64), nil
+	t, pttlErr := redis.Int64(conn.Do("PTTL", "RateLimit:"+identity))
+	if pttlErr != nil {
+		_, err = rl.handleUnexpected(pttlErr)
+		return
+	}
+	// TTL is returned from PTTL in milliseconds and Duration wants nanoseconds
+	reset = time.Duration(t) * time.Millisecond
+
+	return int(remain64), reset, nil
 }
 
 func (rl *RedisLimiter) handleUnexpected(err error) (bool, error) {
