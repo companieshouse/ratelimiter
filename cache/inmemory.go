@@ -1,19 +1,25 @@
 package cache
 
-import "time"
+import (
+	"time"
+
+	"github.com/companieshouse/ratelimiter/log"
+)
 
 // InMemoryLimiter defines a stubbed in-memory rate limiter implementation.
 //
 // This implementation does not provide real rate limiting. Instead it is intended
 // as a stubbed interface for mocking/testing when you don't have (or want to use)
 // a real redis instance.
-type InMemoryLimiter struct{}
+type InMemoryLimiter struct {
+	Logger log.Logger
+}
 
 // Limit provides stubbed rate limiting functionality. For the in-memory implementation
 // this will always return rateLimitExceeded=false
 func (rl *InMemoryLimiter) Limit(identity string, limit int, window time.Duration) (rateLimitExceeded bool, remaining int, reset time.Duration, lastError error) {
 
-	logger.Debug("Rate limiting (in memory) for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
+	rl.Logger.Debug("Rate limiting (in memory) for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
 
 	rateLimitExceeded = false
 	remaining = limit
