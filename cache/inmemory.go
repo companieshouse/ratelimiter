@@ -22,5 +22,5 @@ func (rl *InMemoryLimiter) Limit(identity string, limit int, window time.Duratio
 
 // QueryLimit provides a stubbed fake QueryLimit for inmemory operation
 func (rl *InMemoryLimiter) QueryLimit(identity string, limit int, window time.Duration) (remain int, reset time.Duration, err error) {
-	return 0, window, nil
+	return limit, window, nil
 }
