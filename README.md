@@ -18,7 +18,7 @@ limiter := NewRateLimiter(pool, logger)
 exceeded, remaining, reset, err := limiter.Limit(identity, limit, window)
 
 // Just fetch current remaining limit
-remaining, err := limiter.QueryLimit(identity)
+remaining, reset, err := limiter.QueryLimit(identity, limit, window)
 ```
 
 **Input**
@@ -39,7 +39,7 @@ With in-memory fake caching (**nb** Doesn't perform actual rate limiting. Provid
 limiter := NewRateLimiter(logger)
 
 exceeded, remaining, reset, err := limiter.Limit(identity, limit, window)
-remaining, err := limiter.QueryLimit(identity)
+remaining, reset, err := limiter.QueryLimit(identity, limit, window)
 ```
 
 Unlimited limits

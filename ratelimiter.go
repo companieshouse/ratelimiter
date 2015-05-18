@@ -55,6 +55,6 @@ func (lim *Limiter) Limit(identity string, limit int, window time.Duration) (rat
 }
 
 // QueryLimit returns the current limit defined for the given identity
-func (lim *Limiter) QueryLimit(identity string) (remain int, err error) {
-	return lim.cache.QueryLimit(identity)
+func (lim *Limiter) QueryLimit(identity string, limit int, window time.Duration) (remain int, reset time.Duration, err error) {
+	return lim.cache.QueryLimit(identity, limit, window)
 }
