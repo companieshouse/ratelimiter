@@ -33,7 +33,7 @@ func TestRedisRateLimit(t *testing.T) {
 		limited, remain, reset, err := rl.Limit("abc", 10, 60)
 		So(err, ShouldBeNil)
 		So(remain, ShouldEqual, 0)
-		So(reset, ShouldEqual, 5000)
+		So(reset.Seconds(), ShouldEqual, 5)
 		So(limited, ShouldBeTrue)
 	})
 
@@ -45,7 +45,7 @@ func TestRedisRateLimit(t *testing.T) {
 		limited, remain, reset, err := rl.Limit("abc", 10, 60)
 		So(err, ShouldBeNil)
 		So(remain, ShouldEqual, 9)
-		So(reset, ShouldEqual, 5000)
+		So(reset.Seconds(), ShouldEqual, 5)
 		So(limited, ShouldBeFalse)
 	})
 

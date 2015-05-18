@@ -35,6 +35,11 @@ func TestIntegrationRedisRateLimit(t *testing.T) {
 	conn := pool.Get()
 	defer conn.Close()
 
+	d, err := time.ParseDuration("1m")
+	if err != nil {
+		panic(err)
+	}
+
 	Convey("Integration tests", t, func() {
 
 		Convey("Ensure redis available and setup", func() {
@@ -52,22 +57,22 @@ func TestIntegrationRedisRateLimit(t *testing.T) {
 		})
 
 		Convey("Uncached user", func() {
-			exceeded, remain, reset, err := rl.Limit(clientKey, 1, 60)
+			exceeded, remain, reset, err := rl.Limit(clientKey, 1, d)
 			So(err, ShouldBeNil)
 			So(exceeded, ShouldBeFalse)
 			So(remain, ShouldEqual, 0)
-			So(reset, ShouldBeLessThanOrEqualTo, 60000) // >= to allow for delay in execution
+			So(reset.Seconds(), ShouldBeLessThanOrEqualTo, 60000) // >= to allow for delay in execution
 		})
 
 		Convey("Expired user", func() {
 			conn.Do("SET", storedClientKey, 0)
-			exceeded, _, _, err := rl.Limit(clientKey, 1, 60)
+			exceeded, _, _, err := rl.Limit(clientKey, 1, d)
 			So(err, ShouldBeNil)
 			So(exceeded, ShouldBeTrue)
 		})
 
 		Convey("Unlimited user", func() {
-			exceeded, _, _, err := rl.Limit(clientKey, -1, 60)
+			exceeded, _, _, err := rl.Limit(clientKey, -1, d)
 			So(err, ShouldBeNil)
 			So(exceeded, ShouldBeFalse)
 		})

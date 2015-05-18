@@ -1,6 +1,8 @@
 package ratelimiter
 
 import (
+	"time"
+
 	"github.com/companieshouse/gotools/log"
 	"github.com/companieshouse/ratelimiter/cache"
 	"github.com/garyburd/redigo/redis"
@@ -29,7 +31,7 @@ type Limiter struct {
 }
 
 // Limit implements a rate limiter
-func (lim *Limiter) Limit(identity string, limit int, window int) (rateLimitExceeded bool, remaining int, reset int, lastError error) {
+func (lim *Limiter) Limit(identity string, limit int, window time.Duration) (rateLimitExceeded bool, remaining int, reset time.Duration, lastError error) {
 	if limit == -1 {
 		return false, limit, window, nil // Unlimited user
 	}
