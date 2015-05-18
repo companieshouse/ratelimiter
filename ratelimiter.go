@@ -23,7 +23,7 @@ import (
 
 // NewRateLimiter creates a new instance of rateLimiter
 // If not supplied with a redis connection pool, will use in memory caching instead
-func NewRateLimiter(pool *redis.Pool, logger Logger) *Limiter {
+func New(pool *redis.Pool, logger Logger) *Limiter {
 
 	if logger == nil {
 		logger = &DefaultLogger{}

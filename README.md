@@ -4,6 +4,8 @@ _"No running in the API!"_
 
 Go based ratelimiter with redis backend
 
+[![GoDoc](https://godoc.org/github.com/companieshouse/ratelimiter?status.svg)](https://godoc.org/github.com/companieshouse/ratelimiter)
+
 Usage
 -----
 
