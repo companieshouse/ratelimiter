@@ -1,18 +1,34 @@
+/*
+Package ratelimiter provides a redis backed ratelimiter implementation.
+
+Based on Redis LUA examples from http://redis.io/commands/incr
+
+
+Unlimited limits
+
+There are of course times when you want a user to not be subject to ratelimiting.
+You could just bypass the call to Limit, but that's needless work on your behalf.
+Instead, just set the limit to -1:
+
+    exceeded, remaining, reset, err := limiter.Limit("MyIdentity", -1, 0)
+*/
 package ratelimiter
 
 import (
 	"time"
 
-	"github.com/companieshouse/gotools/log"
 	"github.com/companieshouse/ratelimiter/cache"
 	"github.com/garyburd/redigo/redis"
 )
 
-var logger = log.NewGlogger("ratelimiter", 1)
-
 // NewRateLimiter creates a new instance of rateLimiter
 // If not supplied with a redis connection pool, will use in memory caching instead
-func NewRateLimiter(pool *redis.Pool) *Limiter {
+func NewRateLimiter(pool *redis.Pool, logger Logger) *Limiter {
+
+	if logger == nil {
+		logger = &DefaultLogger{}
+	}
+
 	if pool != nil {
 		logger.Info("Creating rate limiter with redis cache")
 		return &Limiter{
@@ -39,6 +55,6 @@ func (lim *Limiter) Limit(identity string, limit int, window time.Duration) (rat
 }
 
 // QueryLimit returns the current limit defined for the given identity
-func (lim *Limiter) QueryLimit(identity string) (remain int, err error) {
-	return lim.cache.QueryLimit(identity)
+func (lim *Limiter) QueryLimit(identity string, limit int, window time.Duration) (remain int, reset time.Duration, err error) {
+	return lim.cache.QueryLimit(identity, limit, window)
 }

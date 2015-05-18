@@ -12,9 +12,6 @@ type InMemoryLimiter struct{}
 // Limit provides stubbed rate limiting functionality. For the in-memory implementation
 // this will always return rateLimitExceeded=false
 func (rl *InMemoryLimiter) Limit(identity string, limit int, window time.Duration) (rateLimitExceeded bool, remaining int, reset time.Duration, lastError error) {
-
-	logger.Debug("Rate limiting (in memory) for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
-
 	rateLimitExceeded = false
 	remaining = limit
 	reset = window
@@ -24,6 +21,6 @@ func (rl *InMemoryLimiter) Limit(identity string, limit int, window time.Duratio
 }
 
 // QueryLimit provides a stubbed fake QueryLimit for inmemory operation
-func (rl *InMemoryLimiter) QueryLimit(identity string) (remain int, err error) {
-	return 0, nil
+func (rl *InMemoryLimiter) QueryLimit(identity string, limit int, window time.Duration) (remain int, reset time.Duration, err error) {
+	return limit, window, nil
 }

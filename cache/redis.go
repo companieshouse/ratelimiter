@@ -48,8 +48,6 @@ return current`)
 //   * reset     - (time.Duration) length of time until window resets
 func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) (rateLimitExceeded bool, remaining int, reset time.Duration, lastError error) {
 
-	logger.Debug("Rate limiting for identity: [%s] Limit: [%d] Window: [%d]", identity, limit, window)
-
 	var r int64
 	var err error
 
@@ -59,24 +57,22 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) 
 	rateLimitExceeded = false
 
 	r, err = redis.Int64(rlScript.Do(conn, "RateLimit:"+identity, limit, int(window.Seconds()), nil))
-	logger.Debug("Get and Decrement rate limit for identity: [%s] Remaining: [%d] Window: [%d]", identity, r, window)
 
 	if err != nil && err.Error() != errRateLimitExceeded {
-		rateLimitExceeded, lastError = handleUnexpected(err)
+		rateLimitExceeded, lastError = rl.handleUnexpected(err)
 		return
 	}
 	remaining = int(r)
 
 	t, pttlErr := redis.Int64(conn.Do("PTTL", "RateLimit:"+identity))
 	if pttlErr != nil {
-		rateLimitExceeded, lastError = handleUnexpected(pttlErr)
+		rateLimitExceeded, lastError = rl.handleUnexpected(pttlErr)
 		return
 	}
 	// TTL is returned from PTTL in milliseconds and Duration wants nanoseconds
 	reset = time.Duration(t) * time.Millisecond
 
 	if err != nil && err.Error() == errRateLimitExceeded {
-		logger.Debug("Rate limit exceeded for identity: [%s] Time to reset: [%s]", identity, t)
 		rateLimitExceeded = true
 	}
 
@@ -84,16 +80,33 @@ func (rl *RedisLimiter) Limit(identity string, limit int, window time.Duration) 
 }
 
 // QueryLimit allows querying of the current remaining limit for an identity
-func (rl *RedisLimiter) QueryLimit(identity string) (remain int, err error) {
-
+func (rl *RedisLimiter) QueryLimit(identity string, limit int, window time.Duration) (remaining int, reset time.Duration, err error) {
 	conn := rl.Pool.Get()
 	defer conn.Close()
 
 	remain64, err := redis.Int64(conn.Do("GET", "RateLimit:"+identity))
 	if err != nil {
-		logger.Error("ID [%s] Failed to fetch limit remaining", identity)
+		if err == redis.ErrNil {
+			remaining = limit
+			reset = window
+		}
 		return
 	}
 
-	return int(remain64), nil
+	t, pttlErr := redis.Int64(conn.Do("PTTL", "RateLimit:"+identity))
+	if pttlErr != nil {
+		_, err = rl.handleUnexpected(pttlErr)
+		return
+	}
+	// TTL is returned from PTTL in milliseconds and Duration wants nanoseconds
+	reset = time.Duration(t) * time.Millisecond
+
+	return int(remain64), reset, nil
+}
+
+func (rl *RedisLimiter) handleUnexpected(err error) (bool, error) {
+	if err != nil {
+		return true, err
+	}
+	return false, nil
 }

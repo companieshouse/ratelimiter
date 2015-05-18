@@ -30,7 +30,7 @@ func TestIntegrationRedisRateLimit(t *testing.T) {
 		},
 	}
 
-	rl := NewRateLimiter(pool)
+	rl := NewRateLimiter(pool, nil)
 
 	conn := pool.Get()
 	defer conn.Close()
