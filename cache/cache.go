@@ -8,8 +8,8 @@ import (
 
 // Limiter defines an interface for ratelimiter implementations
 type Limiter interface {
-	Limit(string, int, time.Duration) (bool, int, time.Duration, error)
-	QueryLimit(string) (int, error) // QueryLimit allows querying of the current remaining limit for an identity
+	Limit(identity string, limit int, window time.Duration) (isLimitExceeded bool, remaining int, reset time.Duration, err error)
+	QueryLimit(identity string) (remaining int, err error) // QueryLimit allows querying of the current remaining limit for an identity
 }
 
 var logger log.Glogger // Replace with generic via interface
