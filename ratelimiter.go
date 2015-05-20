@@ -17,8 +17,8 @@ package ratelimiter
 import (
 	"time"
 
-	"github.com/companieshouse/ratelimiter/cache"
 	"github.com/garyburd/redigo/redis"
+	"gopkg.in/companieshouse/ratelimiter.v1/cache"
 )
 
 // New creates a new instance of rateLimiter
