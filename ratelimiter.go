@@ -17,11 +17,11 @@ package ratelimiter
 import (
 	"time"
 
-	"github.com/companieshouse/ratelimiter/cache"
 	"github.com/garyburd/redigo/redis"
+	"gopkg.in/companieshouse/ratelimiter.v1/cache"
 )
 
-// NewRateLimiter creates a new instance of rateLimiter
+// New creates a new instance of rateLimiter
 // If not supplied with a redis connection pool, will use in memory caching instead
 func New(pool *redis.Pool, logger Logger) *Limiter {
 
