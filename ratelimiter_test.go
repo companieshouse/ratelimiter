@@ -3,10 +3,10 @@ package ratelimiter
 import (
 	"testing"
 
-	"github.com/companieshouse/ratelimiter/cache"
 	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 	. "github.com/smartystreets/goconvey/convey"
+	"gopkg.in/companieshouse/ratelimiter.v1/cache"
 )
 
 func TestBaseRateLimiter(t *testing.T) {
