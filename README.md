@@ -5,6 +5,7 @@ _"No running in the API!"_
 Go based ratelimiter with redis backend
 
 [![GoDoc](https://godoc.org/gopkg.in/companieshouse/ratelimiter.v1?status.svg)](https://godoc.org/gopkg.in/companieshouse/ratelimiter.v1)
+[![Go Report Card](https://goreportcard.com/badge/github.com/companieshouse/ratelimiter)](https://goreportcard.com/report/github.com/companieshouse/ratelimiter)
 
 Usage
 -----
